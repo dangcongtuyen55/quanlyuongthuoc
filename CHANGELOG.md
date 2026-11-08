@@ -26,3 +26,4 @@
 - **Cấu hình Đóng gói APK**:
   - Cấu hình `app.json` xin quyền `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, `USE_BIOMETRIC`.
   - Cấu hình `eas.json` để build ra file `.apk` cài trực tiếp (sideload).
+

@@ -162,3 +162,31 @@ export async function scheduleSnoozeReminder(
   });
 }
 
+/**
+ * Đặt lại toàn bộ thông báo từ danh sách lịch uống (rescheduleAll)
+ * Chạy khi: mở app, đăng nhập, hoặc sau khi thêm/sửa/xoá thuốc
+ * Quy trình: Huỷ hết thông báo cũ -> Quét các lịch đang bật -> Đặt lại
+ * Giúp app không bao giờ bị thông báo ma hoặc thông báo bị lặp trùng
+ */
+export async function rescheduleAllReminders(
+  schedules: Schedule[]
+): Promise<number> {
+  // 1. Huỷ toàn bộ thông báo cũ
+  await cancelAllReminders();
+
+  let count = 0;
+  // 2. Duyệt qua từng lịch uống hợp lệ để đặt lại
+  for (const schedule of schedules) {
+    if (schedule.enabled && schedule.medication && schedule.medication.is_active) {
+      try {
+        await scheduleMedicationReminder(schedule, schedule.medication);
+        count++;
+      } catch {
+        // Tiếp tục nếu 1 thông báo gặp sự cố
+      }
+    }
+  }
+
+  return count;
+}
+
