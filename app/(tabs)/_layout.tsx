@@ -29,8 +29,8 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Hôm nay',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="calendar-check" size={26} color={color} />
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="calendar-check" size={26} color={color as string} />
           ),
         }}
       />
@@ -38,8 +38,8 @@ export default function TabsLayout() {
         name="medications"
         options={{
           title: 'Tủ thuốc',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="pill" size={26} color={color} />
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="pill" size={26} color={color as string} />
           ),
         }}
       />
@@ -47,8 +47,8 @@ export default function TabsLayout() {
         name="history"
         options={{
           title: 'Lịch sử',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="chart-box-outline" size={26} color={color} />
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="chart-box-outline" size={26} color={color as string} />
           ),
         }}
       />
@@ -56,8 +56,8 @@ export default function TabsLayout() {
         name="settings"
         options={{
           title: 'Cài đặt',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cog-outline" size={26} color={color} />
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="cog-outline" size={26} color={color as string} />
           ),
         }}
       />

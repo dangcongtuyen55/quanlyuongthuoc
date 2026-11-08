@@ -30,6 +30,8 @@ export default function NewMedicationScreen() {
   const [dosage, setDosage] = useState('1 viên');
   const [stock, setStock] = useState('30');
   const [notes, setNotes] = useState('');
+  const [medType, setMedType] = useState('Viên nén');
+  const [mealTiming, setMealTiming] = useState('Sau khi ăn');
   const [selectedTimes, setSelectedTimes] = useState<string[]>(['08:00']);
   const [loading, setLoading] = useState(false);
 
@@ -37,6 +39,18 @@ export default function NewMedicationScreen() {
     { label: 'Sáng', time: '08:00', icon: 'weather-sunny' },
     { label: 'Trưa', time: '12:30', icon: 'white-balance-sunny' },
     { label: 'Tối', time: '19:00', icon: 'weather-night' },
+  ];
+
+  const medTypes = [
+    { label: 'Viên nén', icon: 'pill' },
+    { label: 'Siro / Nước', icon: 'flask-outline' },
+    { label: 'Khác', icon: 'dots-horizontal-circle-outline' },
+  ];
+
+  const mealOptions = [
+    { label: 'Sau khi ăn', desc: 'Tốt cho dạ dày', icon: 'silverware-fork-knife' },
+    { label: 'Trước khi ăn', desc: 'Uống lúc đói', icon: 'clock-outline' },
+    { label: 'Trong bữa ăn', desc: 'Cùng thức ăn', icon: 'food-apple-outline' },
   ];
 
   const toggleSlot = (time: string) => {
@@ -60,12 +74,21 @@ export default function NewMedicationScreen() {
     try {
       setLoading(true);
 
+      // Ghép thông tin cách dùng vào ghi chú
+      const fullNotes = [
+        notes.trim(),
+        mealTiming ? `Cách dùng: ${mealTiming}` : '',
+        medType ? `Dạng: ${medType}` : '',
+      ]
+        .filter(Boolean)
+        .join(' • ');
+
       // 1. Tạo thuốc trong Supabase
       const newMed = await createMedication({
         name: name.trim(),
         dosage: dosage.trim() || '1 liều',
         stock: stock ? parseInt(stock, 10) : undefined,
-        notes: notes.trim() || undefined,
+        notes: fullNotes || undefined,
         low_stock_threshold: 5,
       });
 
@@ -122,7 +145,7 @@ export default function NewMedicationScreen() {
           <Card variant="tonal" style={styles.infoBanner}>
             <View style={styles.bannerIcon}>
               <MaterialCommunityIcons
-                name="pill"
+                name="medical-bag"
                 size={28}
                 color={colors.primary}
               />
@@ -149,6 +172,40 @@ export default function NewMedicationScreen() {
             />
           </View>
 
+          {/* Dạng thuốc (Chips theo Stitch) */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Dạng thuốc</Text>
+            <View style={styles.typeGrid}>
+              {medTypes.map((t) => {
+                const isSelected = medType === t.label;
+                return (
+                  <TouchableOpacity
+                    key={t.label}
+                    onPress={() => setMedType(t.label)}
+                    style={[
+                      styles.typeChip,
+                      isSelected && styles.typeChipActive,
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={t.icon as any}
+                      size={24}
+                      color={isSelected ? colors.onPrimary : colors.primary}
+                    />
+                    <Text
+                      style={[
+                        styles.typeChipText,
+                        isSelected && styles.typeChipTextActive,
+                      ]}
+                    >
+                      {t.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+
           {/* Liều lượng mỗi lần */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Liều lượng mỗi lần uống</Text>
@@ -159,6 +216,57 @@ export default function NewMedicationScreen() {
               value={dosage}
               onChangeText={setDosage}
             />
+          </View>
+
+          {/* Cách dùng (Trước / Sau ăn theo Stitch) */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Cách dùng</Text>
+            <View style={styles.mealList}>
+              {mealOptions.map((opt) => {
+                const isSelected = mealTiming === opt.label;
+                return (
+                  <TouchableOpacity
+                    key={opt.label}
+                    onPress={() => setMealTiming(opt.label)}
+                    style={[
+                      styles.mealCard,
+                      isSelected && styles.mealCardActive,
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.mealIconBox,
+                        isSelected && styles.mealIconBoxActive,
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name={opt.icon as any}
+                        size={22}
+                        color={isSelected ? colors.onPrimary : colors.primary}
+                      />
+                    </View>
+                    <View style={{ flex: 1, marginLeft: 12 }}>
+                      <Text
+                        style={[
+                          styles.mealTitle,
+                          isSelected && styles.mealTitleActive,
+                        ]}
+                      >
+                        {opt.label}
+                      </Text>
+                      <Text style={styles.mealDesc}>{opt.desc}</Text>
+                    </View>
+                    {isSelected && (
+                      <MaterialCommunityIcons
+                        name="check-circle"
+                        size={22}
+                        color={colors.primary}
+                      />
+                    )}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
           </View>
 
           {/* Số lượng tồn kho (để cảnh báo sắp hết) */}
@@ -208,12 +316,12 @@ export default function NewMedicationScreen() {
             </View>
           </View>
 
-          {/* Ghi chú */}
+          {/* Ghi chú thêm */}
           <View style={styles.inputGroup}>
-            <Text style={styles.label}>Ghi chú (tuỳ chọn)</Text>
+            <Text style={styles.label}>Ghi chú thêm (tuỳ chọn)</Text>
             <TextInput
               style={[styles.input, { height: 80, textAlignVertical: 'top', paddingTop: 12 }]}
-              placeholder="Ví dụ: Uống sau khi ăn no 30 phút..."
+              placeholder="Ví dụ: Uống kèm nhiều nước..."
               placeholderTextColor={colors.outline}
               multiline
               value={notes}
@@ -292,6 +400,72 @@ const styles = StyleSheet.create({
     ...typography.bodyLg,
     color: colors.onSurface,
   },
+  typeGrid: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  typeChip: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    borderRadius: rounded.xl,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 1.5,
+    borderColor: colors.outlineVariant,
+  },
+  typeChipActive: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  typeChipText: {
+    ...typography.caption,
+    fontWeight: '700',
+    color: colors.onSurface,
+    marginTop: 6,
+  },
+  typeChipTextActive: {
+    color: colors.onPrimary,
+  },
+  mealList: {
+    gap: 8,
+  },
+  mealCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: rounded.xl,
+    borderWidth: 1.5,
+    borderColor: colors.outlineVariant,
+  },
+  mealCardActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primaryFixed,
+  },
+  mealIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: rounded.full,
+    backgroundColor: colors.surfaceContainerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mealIconBoxActive: {
+    backgroundColor: colors.primary,
+  },
+  mealTitle: {
+    ...typography.labelMd,
+    color: colors.onSurface,
+  },
+  mealTitleActive: {
+    color: colors.primary,
+    fontWeight: '700',
+  },
+  mealDesc: {
+    ...typography.caption,
+    color: colors.onSurfaceVariant,
+  },
   timeSlotRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -322,4 +496,3 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
 });
-
